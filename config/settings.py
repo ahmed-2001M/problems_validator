@@ -148,5 +148,5 @@ STORAGES = {
     },
 }
 
-# CSRF settings for Render
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='http://localhost,http://127.0.0.1', cast=Csv())
+# CSRF settings for Render/Railway
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='http://localhost,http://127.0.0.1,https://*.onrender.com,https://*.railway.app', cast=Csv())
