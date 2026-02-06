@@ -13,9 +13,9 @@ services:
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
-        value: ".render.com"
+        value: ".onrender.com"
       - key: CSRF_TRUSTED_ORIGINS
-        value: "https://*.render.com"
+        value: "https://*.onrender.com"
     buildCommand: python manage.py collectstatic --noinput && python manage.py migrate
     startCommand: gunicorn config.wsgi:application
 
