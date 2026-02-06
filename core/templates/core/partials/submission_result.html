@@ -1,0 +1,16 @@
+<div class="mt-2">
+    {% if submission.auto_result == 'PASS' %}
+        <span class="badge bg-success p-2">PASSED!</span>
+    {% elif submission.auto_result == 'FAIL' %}
+        <span class="badge bg-danger p-2">FAILED</span>
+        <button class="btn btn-sm btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#output-{{ submission.id }}">Details</button>
+        <div class="collapse mt-2" id="output-{{ submission.id }}">
+            <pre class="bg-dark text-light p-2 small rounded">{{ submission.auto_output }}</pre>
+        </div>
+    {% elif submission.auto_result == 'ERROR' %}
+        <span class="badge bg-warning p-2">RUNTIME ERROR</span>
+        <pre class="bg-dark text-light p-2 mt-2 small rounded">{{ submission.auto_output }}</pre>
+    {% else %}
+        <span class="badge bg-info p-2">SUBMITTED (Manual Grading Required)</span>
+    {% endif %}
+</div>

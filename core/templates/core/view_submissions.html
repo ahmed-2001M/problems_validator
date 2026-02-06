@@ -1,0 +1,61 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Submissions - {{ assignment.title }}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Submissions for {{ assignment.title }}</li>
+    </ol>
+</nav>
+
+<h3>Submissions</h3>
+
+<div class="table-responsive">
+    <table class="table table-hover bg-white rounded shadow-sm">
+        <thead class="table-light">
+            <tr>
+                <th>Student</th>
+                <th>Task</th>
+                <th>Submitted At</th>
+                <th>Auto Result</th>
+                <th>Manual Grade</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sub in submissions %}
+            <tr>
+                <td>{{ sub.student.username }}</td>
+                <td>{{ sub.task.title }}</td>
+                <td>{{ sub.submitted_at|date:"M d, H:i" }}</td>
+                <td>
+                    {% if sub.auto_result == 'PASS' %}
+                        <span class="badge bg-success">PASS</span>
+                    {% elif sub.auto_result == 'FAIL' or sub.auto_result == 'ERROR' %}
+                        <span class="badge bg-danger">{{ sub.auto_result }}</span>
+                    {% else %}
+                        <span class="badge bg-secondary">N/A</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if sub.manual_grade %}
+                        <span class="fw-bold text-primary">{{ sub.manual_grade }}/100</span>
+                    {% else %}
+                        <span class="text-muted italic">Not Graded</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'grade_submission' sub.id %}" class="btn btn-sm btn-outline-primary">Grade / Feedback</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No submissions yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

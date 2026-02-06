@@ -1,0 +1,149 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ assignment.title }} - CodeValidator{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card p-3 mb-4 sticky-top" style="top: 20px;">
+            <h3>{{ assignment.title }}</h3>
+            <p>{{ assignment.description }}</p>
+            <div id="pyodide-status" class="alert alert-info py-1 small">
+                <span class="spinner-border spinner-border-sm me-2"></span>Loading Python Runtime...
+            </div>
+            <hr>
+            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist">
+                {% for task in tasks %}
+                <button class="nav-link {% if forloop.first %}active{% endif %} mb-2 text-start" 
+                        id="v-pills-task-{{ task.id }}-tab" data-bs-toggle="pill" 
+                        data-bs-target="#v-pills-task-{{ task.id }}" type="button">
+                    {{ forloop.counter }}. {{ task.title }}
+                </button>
+                {% endfor %}
+            </div>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary mt-3">Back to Dashboard</a>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="tab-content" id="v-pills-tabContent">
+            {% for task in tasks %}
+            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+                 id="v-pills-task-{{ task.id }}" role="tabpanel">
+                <div class="card p-4">
+                    <h4>{{ task.title }}</h4>
+                    <div class="bg-light p-3 rounded mb-4">
+                        {{ task.description|linebreaks }}
+                    </div>
+
+                    {% if task.task_type == 'CODING' %}
+                        <form id="form-{{ task.id }}" onsubmit="event.preventDefault(); runCode({{ task.id }})">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Your Python Code:</label>
+                                <textarea id="code-{{ task.id }}" name="content" class="form-control font-monospace" rows="10" placeholder="# Write your code here..."></textarea>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button type="submit" id="btn-{{ task.id }}" class="btn btn-primary" disabled>
+                                    Run & Submit
+                                </button>
+                                <div id="result-{{ task.id }}"></div>
+                            </div>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{% url 'submit_task' task.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Your Answer:</label>
+                                <textarea name="content" class="form-control" rows="5" placeholder="Write your response here..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Answer</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    let pyodide;
+    const tasksData = {{ tasks_json|safe }};
+
+    async function initPyodide() {
+        try {
+            pyodide = await loadPyodide();
+            document.getElementById('pyodide-status').className = "alert alert-success py-1 small";
+            document.getElementById('pyodide-status').innerHTML = "Python runtime ready!";
+            // Enable buttons
+            document.querySelectorAll('button[id^="btn-"]').forEach(btn => btn.disabled = false);
+        } catch (err) {
+            document.getElementById('pyodide-status').className = "alert alert-danger py-1 small";
+            document.getElementById('pyodide-status').innerHTML = "Failed to load Python.";
+        }
+    }
+    initPyodide();
+
+    async function runCode(taskId) {
+        const code = document.getElementById(`code-${taskId}`).value;
+        const btn = document.getElementById(`btn-${taskId}`);
+        const resultDiv = document.getElementById(`result-${taskId}`);
+        const task = tasksData.find(t => t.id == taskId);
+
+        btn.disabled = true;
+        resultDiv.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Validating...';
+
+        let autoResult = 'PASS';
+        let autoOutput = '';
+
+        try {
+            for (let i = 0; i < task.test_cases.length; i++) {
+                const tc = task.test_cases[i];
+                
+                // Set input using sys.stdin
+                pyodide.runPython(`
+import sys
+import io
+sys.stdin = io.StringIO("${tc.input}")
+sys.stdout = io.StringIO()
+                `);
+
+                await pyodide.runPythonAsync(code);
+                
+                const actual = pyodide.runPython("sys.stdout.getvalue()").trim();
+                const expected = tc.output.trim();
+
+                if (actual !== expected) {
+                    autoResult = 'FAIL';
+                    autoOutput += `Test Case ${i+1} Failed.\nExpected: ${expected}\nActual: ${actual}\n\n`;
+                    break; 
+                } else {
+                    autoOutput += `Test Case ${i+1} Passed.\n`;
+                }
+            }
+        } catch (err) {
+            autoResult = 'ERROR';
+            autoOutput = err.message;
+        }
+
+        // Send to server via HTMX manually or just plain fetch
+        const formData = new FormData();
+        formData.append('content', code);
+        formData.append('auto_result', autoResult);
+        formData.append('auto_output', autoOutput);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch(`/task/${taskId}/submit/`, {
+            method: 'POST',
+            headers: { 'HX-Request': 'true' },
+            body: formData
+        })
+        .then(response => response.text())
+        .then(html => {
+            resultDiv.innerHTML = html;
+            btn.disabled = false;
+        });
+    }
+</script>
+{% endblock %}

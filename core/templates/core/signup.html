@@ -1,0 +1,22 @@
+{% extends 'core/base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}Signup - CodeValidator{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card p-4">
+            <h3 class="text-center mb-4">Create Account</h3>
+            <form method="post">
+                {% csrf_token %}
+                {% bootstrap_form form %}
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">Signup</button>
+                </div>
+            </form>
+            <p class="mt-3 text-center">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

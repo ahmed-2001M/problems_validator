@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Student Dashboard - CodeValidator{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Available Assignments</h2>
+
+<div class="row">
+    {% for assignment in assignments %}
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ assignment.title }}</h5>
+                <p class="card-text text-muted">{{ assignment.description|truncatewords:20 }}</p>
+                <div class="mb-3">
+                    {% if assignment.is_live %}
+                        <span class="badge bg-success">Live Now</span>
+                    {% elif assignment.start_time and assignment.start_time > now %}
+                        <span class="badge bg-warning text-dark">Starts at {{ assignment.start_time|date:"M d, H:i" }}</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Ended</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex gap-2">
+                    {% if assignment.is_live %}
+                        <a href="{% url 'assignment_detail' assignment.id %}" class="btn btn-primary">Start Assignment</a>
+                    {% else %}
+                        <button class="btn btn-secondary" disabled>Not Available</button>
+                    {% endif %}
+                    <a href="{% url 'leaderboard' assignment.id %}" class="btn btn-outline-info">Leaderboard</a>
+                </div>
+            </div>
+            <div class="card-footer text-muted small">
+                Teacher: {{ assignment.teacher.username }}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-center">No assignments available at the moment.</p>
+    {% endfor %}
+</div>
+{% endblock %}

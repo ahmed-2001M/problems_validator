@@ -1,0 +1,41 @@
+{% load core_extras %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Rank</th>
+                <th>Student</th>
+                {% for task in tasks %}
+                <th class="text-center small">{{ forloop.counter }}</th>
+                {% endfor %}
+                <th class="text-center">Solved</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td><strong>#{{ forloop.counter }}</strong></td>
+                <td>{{ student.username }}</td>
+                {% for task in tasks %}
+                <td class="text-center">
+                    {% with status=student.task_results|get_item:task.id %}
+                        {% if status == 'PASS' %}
+                            <div class="bg-success rounded-circle d-inline-block" style="width: 20px; height: 20px;" title="{{ task.title }}: Solved"></div>
+                        {% elif status == 'FAIL' %}
+                            <div class="bg-danger rounded-circle d-inline-block" style="width: 20px; height: 20px;" title="{{ task.title }}: Failed"></div>
+                        {% else %}
+                            <div class="bg-secondary opacity-25 rounded-circle d-inline-block" style="width: 20px; height: 20px;" title="{{ task.title }}: Not Attempted"></div>
+                        {% endif %}
+                    {% endwith %}
+                </td>
+                {% endfor %}
+                <td class="text-center fw-bold">{{ student.solved_count }} / {{ tasks|length }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="{{ tasks|length|add:3 }}" class="text-center py-4 text-muted">No submissions yet. Wait for students to start solving!</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

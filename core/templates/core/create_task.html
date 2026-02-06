@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Add Task - CodeValidator{% endblock %}
+
+{% block content %}
+<div class="card p-4 mx-auto" style="max-width: 800px;">
+    <h3>Add Task to {{ assignment.title }}</h3>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="title" class="form-label">Task Title</label>
+            <input type="text" name="title" id="title" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Task Description</label>
+            <textarea name="description" id="description" class="form-control" rows="5" required></textarea>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="task_type" class="form-label">Task Type</label>
+                <select name="task_type" id="task_type" class="form-select">
+                    <option value="CODING">Coding Task</option>
+                    <option value="DESCRIPTION_ONLY">Description Only</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="validation_type" class="form-label">Validation Type</label>
+                <select name="validation_type" id="validation_type" class="form-select">
+                    <option value="MANUAL">Manual Grading</option>
+                    <option value="AUTO">Auto Validation</option>
+                </select>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'manage_tasks' assignment.id %}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Add Task</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

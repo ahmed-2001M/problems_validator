@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Waiting for Approval - CodeValidator{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card p-5 text-center">
+            <div class="mb-4">
+                <span class="display-1 text-info">⏳</span>
+            </div>
+            <h3>Account Pending Approval</h3>
+            <p class="text-muted">
+                Your teacher account has been created successfully. An administrator needs to approve your account before you can start creating assignments.
+            </p>
+            <p>We'll notify you once your account is ready!</p>
+            <div class="mt-4">
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-secondary">Log Out</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

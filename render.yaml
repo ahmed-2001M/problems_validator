@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: problems_validator
+    runtime: docker
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: problems_db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".render.com"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://*.render.com"
+    buildCommand: python manage.py collectstatic --noinput && python manage.py migrate
+    startCommand: gunicorn config.wsgi:application
+
+databases:
+  - name: problems_db
+    databaseName: problems_validator
+    plan: free
+    user: problems_user

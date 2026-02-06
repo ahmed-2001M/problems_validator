@@ -1,0 +1,12 @@
+<ul class="list-group">
+    {% for tc in test_cases %}
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+        <div class="ms-2 me-auto">
+            <div class="fw-bold">Input: {{ tc.input_data|default:"(None)" }}</div>
+            Expected Output: <code>{{ tc.expected_output }}</code>
+        </div>
+    </li>
+    {% empty %}
+    <li class="list-group-item">No test cases yet.</li>
+    {% endfor %}
+</ul>

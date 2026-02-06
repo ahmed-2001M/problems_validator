@@ -1,0 +1,48 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Grade Submission - {{ submission.student.username }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-7">
+        <div class="card p-4">
+            <h4>Submission by {{ submission.student.username }}</h4>
+            <div class="bg-light p-2 rounded mb-3 small">
+                <strong>Task:</strong> {{ submission.task.title }}<br>
+                <strong>Type:</strong> {{ submission.task.get_task_type_display }}
+            </div>
+            
+            <label class="fw-bold mb-2">Submitted Content:</label>
+            <pre class="bg-dark text-light p-3 rounded font-monospace">{{ submission.content }}</pre>
+            
+            {% if submission.auto_output %}
+                <label class="fw-bold mb-2">Auto-Validation Output:</label>
+                <div class="alert alert-info py-2">
+                    <pre class="mb-0 small">{{ submission.auto_output }}</pre>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card p-4">
+            <h4>Grading & Feedback</h4>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="grade" class="form-label">Grade (0-100)</label>
+                    <input type="number" name="grade" id="grade" class="form-control" 
+                           value="{{ submission.manual_grade|default:'' }}" step="0.01" min="0" max="100">
+                </div>
+                <div class="mb-3">
+                    <label for="comments" class="form-label">Teacher Comments</label>
+                    <textarea name="comments" id="comments" class="form-control" rows="5">{{ submission.teacher_comments }}</textarea>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'view_submissions' submission.task.assignment.id %}" class="btn btn-outline-secondary">Back</a>
+                    <button type="submit" class="btn btn-primary">Save Grade</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
