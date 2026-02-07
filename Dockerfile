@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y \
     libmariadb-dev-compat \
     libmariadb-dev \
     ca-certificates \
+    default-mysql-server \
+    supervisor \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
@@ -29,5 +31,8 @@ COPY . .
 # Static files will be served by WhiteNoise
 RUN python manage.py collectstatic --noinput
 
-# Run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi:application"]
+# Make scripts executable
+RUN chmod +x entrypoint.sh
+
+# Run the application via entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
