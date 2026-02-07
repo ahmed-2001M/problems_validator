@@ -1,14 +1,20 @@
 #!/bin/bash
 set -e
 
-# Ensure MySQL data directory exists on the volume
+# Ensure MySQL data directory exists and has correct permissions
+mkdir -p /var/lib/mysql
+chown -R mysql:mysql /var/lib/mysql
+mkdir -p /run/mysqld
+chown -R mysql:mysql /run/mysqld
+
+# Ensure MySQL data directory is initialized
 if [ ! -d "/var/lib/mysql/mysql" ]; then
     echo "Initializing MySQL database..."
     mysqld --initialize-insecure --user=mysql --datadir=/var/lib/mysql
 fi
 
 # Start MySQL temporarily to setup users and database
-mysqld_safe --datadir=/var/lib/mysql &
+mysqld_safe --user=mysql --datadir=/var/lib/mysql &
 MYSQL_PID=$!
 
 # Wait for MySQL to be ready
