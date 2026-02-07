@@ -24,27 +24,31 @@ until mysqladmin ping >/dev/null 2>&1; do
 done
 
 # Create database and user if they don't exist
-# We use environment variables or defaults from docker-compose
 DB_NAME=${MYSQL_DATABASE:-problems_validator}
 DB_USER=${MYSQL_USER:-user}
 DB_PASS=${MYSQL_PASSWORD:-123}
 
+echo "Configuring MySQL database and users..."
 mysql -e "CREATE DATABASE IF NOT EXISTS \`$DB_NAME\`;"
 mysql -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';"
 mysql -e "GRANT ALL PRIVILEGES ON \`$DB_NAME\`.* TO '$DB_USER'@'localhost';"
 mysql -e "FLUSH PRIVILEGES;"
 
 # Run migrations
+echo "Running Django migrations..."
 python manage.py migrate --noinput
 
 # Create admin user if requested (optional)
 if [ "$CREATE_SUPERUSER" = "True" ]; then
+    echo "Creating superuser..."
     python create_admin.py || echo "Superuser creation failed or already exists"
 fi
 
-# Stop the temporary MySQL process
-kill $MYSQL_PID
+# Stop the temporary MySQL process cleanly
+echo "Shutting down temporary MySQL..."
+mysqladmin shutdown
 wait $MYSQL_PID
 
+echo "Starting Supervisor..."
 # Start Supervisor to manage both MySQL and Gunicorn
 exec /usr/bin/supervisord -c /app/supervisord.conf
