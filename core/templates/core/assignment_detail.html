@@ -16,9 +16,9 @@
             <hr>
             <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist">
                 {% for task in tasks %}
-                <button class="nav-link {% if forloop.first %}active{% endif %} mb-2 text-start" 
-                        id="v-pills-task-{{ task.id }}-tab" data-bs-toggle="pill" 
-                        data-bs-target="#v-pills-task-{{ task.id }}" type="button">
+                <button class="nav-link {% if forloop.first %}active{% endif %} mb-2 text-start"
+                    id="v-pills-task-{{ task.id }}-tab" data-bs-toggle="pill"
+                    data-bs-target="#v-pills-task-{{ task.id }}" type="button">
                     {{ forloop.counter }}. {{ task.title }}
                 </button>
                 {% endfor %}
@@ -29,8 +29,8 @@
     <div class="col-md-8">
         <div class="tab-content" id="v-pills-tabContent">
             {% for task in tasks %}
-            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
-                 id="v-pills-task-{{ task.id }}" role="tabpanel">
+            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="v-pills-task-{{ task.id }}"
+                role="tabpanel">
                 <div class="card p-4">
                     <h4>{{ task.title }}</h4>
                     <div class="bg-light p-3 rounded mb-4">
@@ -38,27 +38,29 @@
                     </div>
 
                     {% if task.task_type == 'CODING' %}
-                        <form id="form-{{ task.id }}" onsubmit="event.preventDefault(); runCode({{ task.id }})">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Your Python Code:</label>
-                                <textarea id="code-{{ task.id }}" name="content" class="form-control font-monospace" rows="10" placeholder="# Write your code here..."></textarea>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <button type="submit" id="btn-{{ task.id }}" class="btn btn-primary" disabled>
-                                    Run & Submit
-                                </button>
-                                <div id="result-{{ task.id }}"></div>
-                            </div>
-                        </form>
+                    <form id="form-{{ task.id }}" onsubmit="event.preventDefault(); runCode({{ task.id }})">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Your Python Code:</label>
+                            <textarea id="code-{{ task.id }}" name="content" class="form-control font-monospace"
+                                rows="10" placeholder="# Write your code here..."></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="submit" id="btn-{{ task.id }}" class="btn btn-primary" disabled>
+                                Run & Submit
+                            </button>
+                            <div id="result-{{ task.id }}"></div>
+                        </div>
+                    </form>
                     {% else %}
-                        <form method="post" action="{% url 'submit_task' task.id %}">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Your Answer:</label>
-                                <textarea name="content" class="form-control" rows="5" placeholder="Write your response here..."></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Submit Answer</button>
-                        </form>
+                    <form method="post" action="{% url 'submit_task' task.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Your Answer:</label>
+                            <textarea name="content" class="form-control" rows="5"
+                                placeholder="Write your response here..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Answer</button>
+                    </form>
                     {% endif %}
                 </div>
             </div>
@@ -69,7 +71,7 @@
 
 <script>
     let pyodide;
-    const tasksData = {{ tasks_json|safe }};
+    const tasksData = {{ tasks_json| safe }};
 
     async function initPyodide() {
         try {
@@ -100,26 +102,34 @@
         try {
             for (let i = 0; i < task.test_cases.length; i++) {
                 const tc = task.test_cases[i];
-                
+
+                // Properly escape the input for use in template literal
+                const escapedInput = tc.input
+                    .replace(/\\/g, '\\\\')
+                    .replace(/"/g, '\\"')
+                    .replace(/\n/g, '\\n')
+                    .replace(/\r/g, '\\r')
+                    .replace(/\t/g, '\\t');
+
                 // Set input using sys.stdin
                 pyodide.runPython(`
 import sys
 import io
-sys.stdin = io.StringIO("${tc.input}")
+sys.stdin = io.StringIO("${escapedInput}")
 sys.stdout = io.StringIO()
                 `);
 
                 await pyodide.runPythonAsync(code);
-                
+
                 const actual = pyodide.runPython("sys.stdout.getvalue()").trim();
                 const expected = tc.output.trim();
 
                 if (actual !== expected) {
                     autoResult = 'FAIL';
-                    autoOutput += `Test Case ${i+1} Failed.\nExpected: ${expected}\nActual: ${actual}\n\n`;
-                    break; 
+                    autoOutput += `Test Case ${i + 1} Failed.\nExpected: ${expected}\nActual: ${actual}\n\n`;
+                    break;
                 } else {
-                    autoOutput += `Test Case ${i+1} Passed.\n`;
+                    autoOutput += `Test Case ${i + 1} Passed.\n`;
                 }
             }
         } catch (err) {
@@ -139,11 +149,11 @@ sys.stdout = io.StringIO()
             headers: { 'HX-Request': 'true' },
             body: formData
         })
-        .then(response => response.text())
-        .then(html => {
-            resultDiv.innerHTML = html;
-            btn.disabled = false;
-        });
+            .then(response => response.text())
+            .then(html => {
+                resultDiv.innerHTML = html;
+                btn.disabled = false;
+            });
     }
 </script>
 {% endblock %}

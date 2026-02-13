@@ -1,0 +1,78 @@
+{
+  "title": "Python Programming Basics",
+  "description": "This assignment covers fundamental Python programming concepts including input/output, arithmetic operations, and conditional statements.",
+  "start_time": "2026-02-15T10:00:00Z",
+  "end_time": "2026-02-20T23:59:59Z",
+  "tasks": [
+    {
+      "title": "Sum of Two Numbers",
+      "description": "Write a Python program that reads two integers from input and prints their sum.\n\nInput Format:\nTwo integers on separate lines\n\nOutput Format:\nA single integer representing the sum",
+      "task_type": "CODING",
+      "validation_type": "AUTO",
+      "order": 1,
+      "test_cases": [
+        {
+          "input_data": "5\n3\n",
+          "expected_output": "8"
+        },
+        {
+          "input_data": "10\n20\n",
+          "expected_output": "30"
+        },
+        {
+          "input_data": "-5\n5\n",
+          "expected_output": "0"
+        }
+      ]
+    },
+    {
+      "title": "Even or Odd",
+      "description": "Write a Python program that reads an integer and prints 'Even' if it's even, or 'Odd' if it's odd.\n\nInput Format:\nA single integer\n\nOutput Format:\nEither 'Even' or 'Odd'",
+      "task_type": "CODING",
+      "validation_type": "AUTO",
+      "order": 2,
+      "test_cases": [
+        {
+          "input_data": "4\n",
+          "expected_output": "Even"
+        },
+        {
+          "input_data": "7\n",
+          "expected_output": "Odd"
+        },
+        {
+          "input_data": "0\n",
+          "expected_output": "Even"
+        }
+      ]
+    },
+    {
+      "title": "Maximum of Three Numbers",
+      "description": "Write a Python program that reads three integers and prints the maximum value.\n\nInput Format:\nThree integers on separate lines\n\nOutput Format:\nA single integer representing the maximum",
+      "task_type": "CODING",
+      "validation_type": "AUTO",
+      "order": 3,
+      "test_cases": [
+        {
+          "input_data": "5\n3\n8\n",
+          "expected_output": "8"
+        },
+        {
+          "input_data": "10\n10\n5\n",
+          "expected_output": "10"
+        },
+        {
+          "input_data": "-1\n-5\n-3\n",
+          "expected_output": "-1"
+        }
+      ]
+    },
+    {
+      "title": "Essay Question",
+      "description": "Explain the difference between a list and a tuple in Python. Provide examples of when you would use each data structure.",
+      "task_type": "DESCRIPTION_ONLY",
+      "validation_type": "MANUAL",
+      "order": 4
+    }
+  ]
+}

@@ -7,6 +7,43 @@ from .forms import CustomUserCreationForm
 from .models import Assignment, Task, Submission, TestCase, User
 # Removed server-side executor import
 
+@login_required
+def import_assignment_view(request):
+    """View for importing assignments from JSON files."""
+    if not request.user.is_teacher():
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        if 'json_file' not in request.FILES:
+            messages.error(request, "No file uploaded")
+            return render(request, 'core/import_assignment.html')
+        
+        json_file = request.FILES['json_file']
+        
+        # Validate file extension
+        if not json_file.name.endswith('.json'):
+            messages.error(request, "File must be a JSON file (.json)")
+            return render(request, 'core/import_assignment.html')
+        
+        # Import the assignment
+        from core.services.assignment_importer import AssignmentImporter, AssignmentImportError
+        
+        try:
+            importer = AssignmentImporter(request.user)
+            assignment = importer.import_from_uploaded_file(json_file)
+            messages.success(
+                request, 
+                f"Successfully imported assignment '{assignment.title}' with {assignment.tasks.count()} tasks"
+            )
+            return redirect('manage_tasks', assignment_id=assignment.id)
+        except AssignmentImportError as e:
+            messages.error(request, f"Import failed: {e}")
+        except Exception as e:
+            messages.error(request, f"Unexpected error: {e}")
+    
+    return render(request, 'core/import_assignment.html')
+
+
 def signup_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -102,6 +139,46 @@ def create_assignment(request):
     return render(request, 'core/create_assignment.html')
 
 @login_required
+def edit_assignment(request, assignment_id):
+    if not request.user.is_teacher(): return redirect('dashboard')
+    assignment = get_object_or_404(Assignment, id=assignment_id, teacher=request.user)
+    if request.method == 'POST':
+        assignment.title = request.POST.get('title')
+        assignment.description = request.POST.get('description')
+        
+        # Handle datetime fields properly
+        start_time_str = request.POST.get('start_time')
+        end_time_str = request.POST.get('end_time')
+        
+        if start_time_str:
+            from django.utils.dateparse import parse_datetime
+            assignment.start_time = parse_datetime(start_time_str)
+        else:
+            assignment.start_time = None
+            
+        if end_time_str:
+            from django.utils.dateparse import parse_datetime
+            assignment.end_time = parse_datetime(end_time_str)
+        else:
+            assignment.end_time = None
+        
+        assignment.save()
+        messages.success(request, f"Assignment '{assignment.title}' updated successfully")
+        return redirect('manage_tasks', assignment_id=assignment.id)
+    return render(request, 'core/edit_assignment.html', {'assignment': assignment})
+
+@login_required
+def delete_assignment(request, assignment_id):
+    if not request.user.is_teacher(): return redirect('dashboard')
+    assignment = get_object_or_404(Assignment, id=assignment_id, teacher=request.user)
+    if request.method == 'POST':
+        title = assignment.title
+        assignment.delete()
+        messages.success(request, f"Assignment '{title}' deleted successfully")
+        return redirect('dashboard')
+    return render(request, 'core/delete_assignment.html', {'assignment': assignment})
+
+@login_required
 def leaderboard(request, assignment_id):
     assignment = get_object_or_404(Assignment, id=assignment_id)
     tasks = assignment.tasks.all()
@@ -180,6 +257,55 @@ def add_test_case(request, task_id):
              return render(request, 'core/partials/test_case_list.html', {'test_cases': test_cases})
         return redirect('manage_tasks', assignment_id=task.assignment.id)
     return render(request, 'core/add_test_case.html', {'task': task})
+
+@login_required
+def edit_task(request, task_id):
+    if not request.user.is_teacher(): return redirect('dashboard')
+    task = get_object_or_404(Task, id=task_id, assignment__teacher=request.user)
+    if request.method == 'POST':
+        task.title = request.POST.get('title')
+        task.description = request.POST.get('description')
+        task.task_type = request.POST.get('task_type')
+        task.validation_type = request.POST.get('validation_type')
+        task.save()
+        messages.success(request, f"Task '{task.title}' updated successfully")
+        return redirect('manage_tasks', assignment_id=task.assignment.id)
+    return render(request, 'core/edit_task.html', {'task': task})
+
+@login_required
+def delete_task(request, task_id):
+    if not request.user.is_teacher(): return redirect('dashboard')
+    task = get_object_or_404(Task, id=task_id, assignment__teacher=request.user)
+    if request.method == 'POST':
+        assignment_id = task.assignment.id
+        title = task.title
+        task.delete()
+        messages.success(request, f"Task '{title}' deleted successfully")
+        return redirect('manage_tasks', assignment_id=assignment_id)
+    return render(request, 'core/delete_task.html', {'task': task})
+
+@login_required
+def edit_test_case(request, testcase_id):
+    if not request.user.is_teacher(): return redirect('dashboard')
+    test_case = get_object_or_404(TestCase, id=testcase_id, task__assignment__teacher=request.user)
+    if request.method == 'POST':
+        test_case.input_data = request.POST.get('input_data')
+        test_case.expected_output = request.POST.get('expected_output')
+        test_case.save()
+        messages.success(request, "Test case updated successfully")
+        return redirect('manage_tasks', assignment_id=test_case.task.assignment.id)
+    return render(request, 'core/edit_test_case.html', {'test_case': test_case})
+
+@login_required
+def delete_test_case(request, testcase_id):
+    if not request.user.is_teacher(): return redirect('dashboard')
+    test_case = get_object_or_404(TestCase, id=testcase_id, task__assignment__teacher=request.user)
+    if request.method == 'POST':
+        assignment_id = test_case.task.assignment.id
+        test_case.delete()
+        messages.success(request, "Test case deleted successfully")
+        return redirect('manage_tasks', assignment_id=assignment_id)
+    return render(request, 'core/delete_test_case.html', {'test_case': test_case})
 
 # Student Views
 import json

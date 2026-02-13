@@ -1,0 +1,109 @@
+{% extends 'core/base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}Import Assignment - CodeValidator{% endblock %}
+
+{% block content %}
+<div class="card p-4 mx-auto" style="max-width: 900px;">
+    <h3>Import Assignment from JSON</h3>
+    <p class="text-muted">Upload a JSON file to import an assignment with all its tasks and test cases.</p>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="json_file" class="form-label">Select JSON File</label>
+            <input type="file" name="json_file" id="json_file" class="form-control" accept=".json" required>
+            <div class="form-text">Only .json files are accepted</div>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Back</a>
+            <button type="submit" class="btn btn-primary">Import Assignment</button>
+        </div>
+    </form>
+    
+    <hr class="my-4">
+    
+    <div class="accordion" id="jsonFormatAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#jsonFormat">
+                    JSON Format Documentation
+                </button>
+            </h2>
+            <div id="jsonFormat" class="accordion-collapse collapse" data-bs-parent="#jsonFormatAccordion">
+                <div class="accordion-body">
+                    <h5>Required Fields</h5>
+                    <ul>
+                        <li><code>title</code> - Assignment title (string)</li>
+                        <li><code>tasks</code> - Array of task objects</li>
+                    </ul>
+                    
+                    <h5>Optional Fields</h5>
+                    <ul>
+                        <li><code>description</code> - Assignment description (string)</li>
+                        <li><code>start_time</code> - Start date/time in ISO format (e.g., "2026-02-15T10:00:00Z")</li>
+                        <li><code>end_time</code> - End date/time in ISO format</li>
+                    </ul>
+                    
+                    <h5>Task Object Fields</h5>
+                    <ul>
+                        <li><code>title</code> - Task title (required)</li>
+                        <li><code>description</code> - Task description (required)</li>
+                        <li><code>task_type</code> - Either "CODING" or "DESCRIPTION_ONLY" (default: "CODING")</li>
+                        <li><code>validation_type</code> - Either "AUTO" or "MANUAL" (default: "MANUAL")</li>
+                        <li><code>order</code> - Display order (number, default: 0)</li>
+                        <li><code>test_cases</code> - Array of test case objects (optional)</li>
+                    </ul>
+                    
+                    <h5>Test Case Object Fields</h5>
+                    <ul>
+                        <li><code>input_data</code> - Input to pass to the script (optional)</li>
+                        <li><code>expected_output</code> - Expected output (required)</li>
+                    </ul>
+                    
+                    <h5>Example JSON</h5>
+                    <pre class="bg-light p-3 rounded"><code>{
+  "title": "Python Programming Basics",
+  "description": "Introduction to Python programming",
+  "start_time": "2026-02-15T10:00:00Z",
+  "end_time": "2026-02-20T23:59:59Z",
+  "tasks": [
+    {
+      "title": "Sum of Two Numbers",
+      "description": "Write a program that reads two integers and prints their sum.",
+      "task_type": "CODING",
+      "validation_type": "AUTO",
+      "order": 1,
+      "test_cases": [
+        {
+          "input_data": "5\\n3\\n",
+          "expected_output": "8"
+        },
+        {
+          "input_data": "10\\n20\\n",
+          "expected_output": "30"
+        }
+      ]
+    },
+    {
+      "title": "Essay Question",
+      "description": "Explain the difference between lists and tuples.",
+      "task_type": "DESCRIPTION_ONLY",
+      "validation_type": "MANUAL",
+      "order": 2
+    }
+  ]
+}</code></pre>
+                    
+                    <div class="alert alert-info mt-3">
+                        <strong>Tip:</strong> You can download the example file 
+                        <a href="/static/assignment_format.json" download>assignment_format.json</a> 
+                        from the project repository to use as a template.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

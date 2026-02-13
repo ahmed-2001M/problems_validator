@@ -9,9 +9,16 @@ urlpatterns = [
     
     # Teacher
     path('assignment/create/', views.create_assignment, name='create_assignment'),
+    path('assignment/import/', views.import_assignment_view, name='import_assignment'),
+    path('assignment/<int:assignment_id>/edit/', views.edit_assignment, name='edit_assignment'),
+    path('assignment/<int:assignment_id>/delete/', views.delete_assignment, name='delete_assignment'),
     path('assignment/<int:assignment_id>/tasks/', views.manage_tasks, name='manage_tasks'),
     path('assignment/<int:assignment_id>/tasks/create/', views.create_task, name='create_task'),
+    path('task/<int:task_id>/edit/', views.edit_task, name='edit_task'),
+    path('task/<int:task_id>/delete/', views.delete_task, name='delete_task'),
     path('task/<int:task_id>/testcase/add/', views.add_test_case, name='add_test_case'),
+    path('testcase/<int:testcase_id>/edit/', views.edit_test_case, name='edit_test_case'),
+    path('testcase/<int:testcase_id>/delete/', views.delete_test_case, name='delete_test_case'),
     path('assignment/<int:assignment_id>/submissions/', views.view_submissions, name='view_submissions'),
     path('submission/<int:submission_id>/grade/', views.grade_submission, name='grade_submission'),
 

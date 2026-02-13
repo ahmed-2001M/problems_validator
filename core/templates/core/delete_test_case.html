@@ -1,0 +1,32 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Delete Test Case - CodeValidator{% endblock %}
+
+{% block content %}
+<div class="card p-4 mx-auto" style="max-width: 600px;">
+    <h3 class="text-danger">Delete Test Case</h3>
+    <div class="alert alert-warning">
+        <strong>Warning!</strong> This action cannot be undone.
+    </div>
+
+    <p><strong>Task:</strong> {{ test_case.task.title }}</p>
+    <p><strong>Assignment:</strong> {{ test_case.task.assignment.title }}</p>
+
+    <div class="card bg-light mt-3">
+        <div class="card-body">
+            <h6>Input Data:</h6>
+            <pre class="mb-2">{{ test_case.input_data|default:"(empty)" }}</pre>
+            <h6>Expected Output:</h6>
+            <pre>{{ test_case.expected_output }}</pre>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="d-flex justify-content-between mt-4">
+            <a href="{% url 'manage_tasks' test_case.task.assignment.id %}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger">Delete Test Case</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

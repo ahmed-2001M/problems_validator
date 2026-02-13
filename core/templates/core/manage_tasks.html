@@ -13,7 +13,11 @@
         </nav>
         <h2>Tasks for {{ assignment.title }}</h2>
     </div>
-    <a href="{% url 'create_task' assignment.id %}" class="btn btn-success">Add New Task</a>
+    <div class="d-flex gap-2">
+        <a href="{% url 'edit_assignment' assignment.id %}" class="btn btn-outline-primary btn-sm">Edit Assignment</a>
+        <a href="{% url 'delete_assignment' assignment.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
+        <a href="{% url 'create_task' assignment.id %}" class="btn btn-success">Add New Task</a>
+    </div>
 </div>
 
 <div class="list-group">
@@ -27,8 +31,10 @@
         <div class="mt-2">
             <small class="text-primary">{{ task.get_validation_type_display }}</small>
             {% if task.task_type == 'CODING' and task.validation_type == 'AUTO' %}
-                <a href="{% url 'add_test_case' task.id %}" class="btn btn-sm btn-outline-info ms-3">Manage Test Cases</a>
+            <a href="{% url 'add_test_case' task.id %}" class="btn btn-sm btn-outline-info ms-3">Manage Test Cases</a>
             {% endif %}
+            <a href="{% url 'edit_task' task.id %}" class="btn btn-sm btn-outline-primary ms-2">Edit Task</a>
+            <a href="{% url 'delete_task' task.id %}" class="btn btn-sm btn-outline-danger ms-2">Delete Task</a>
         </div>
     </div>
     {% empty %}
